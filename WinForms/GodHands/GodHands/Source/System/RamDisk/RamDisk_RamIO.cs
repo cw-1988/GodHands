@@ -45,14 +45,19 @@ namespace GodHands {
                 return false;
             }
 
-            for (int x = 0; x < len; x += 2048) {
-                if (!Read((pos + x)/2048)) {
+            int copied = 0;
+            while (copied < len) {
+                int absolute = pos + copied;
+                int lba = absolute / 2048;
+                int offsetInSector = absolute % 2048;
+                int chunk = Math.Min(2048 - offsetInSector, len - copied);
+                if (!Read(lba)) {
                     return Rollback(pos);
                 }
-                for (int i = 0; i < 2048; i++) {
-                    if (x + i >= len) break;
-                    buf[x + i] = disk[pos + x + i];
+                for (int i = 0; i < chunk; i++) {
+                    buf[copied + i] = disk[lba*2048 + offsetInSector + i];
                 }
+                copied += chunk;
             }
             return true;
         }
@@ -65,14 +70,22 @@ namespace GodHands {
                 return false;
             }
 
-            for (int x = 0; x < len; x += 2048) {
-                for (int i = 0; i < 2048; i++) {
-                    if (x + i >= len) break;
-                    disk[pos + x + i] = buf[x + i];
-                }
-                if (!Write((pos + x)/2048)) {
+            int copied = 0;
+            while (copied < len) {
+                int absolute = pos + copied;
+                int lba = absolute / 2048;
+                int offsetInSector = absolute % 2048;
+                int chunk = Math.Min(2048 - offsetInSector, len - copied);
+                if (!Read(lba)) {
                     return Rollback(pos);
                 }
+                for (int i = 0; i < chunk; i++) {
+                    disk[lba*2048 + offsetInSector + i] = buf[copied + i];
+                }
+                if (!Write(lba)) {
+                    return Rollback(pos);
+                }
+                copied += chunk;
             }
             return true;
         }

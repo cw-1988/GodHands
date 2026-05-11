@@ -2,13 +2,88 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
 namespace GodHands {
+    public enum ActorModelSectionKind {
+        CharacterShp,
+        WeaponWep,
+        ShieldWep,
+        CommonSeq,
+        BattleSeq,
+    }
+
+    public class ActorModelSection : InMemory {
+        private readonly string displayText;
+        private readonly int len;
+        private readonly string containerFile;
+        private readonly int offsetInContainer;
+        private readonly string exportName;
+        private readonly ActorModelSectionKind kind;
+
+        public ActorModelSection(
+            string url,
+            int pos,
+            int len,
+            DirRec rec,
+            string displayText,
+            string containerFile,
+            int offsetInContainer,
+            string exportName,
+            ActorModelSectionKind kind) : base(url, pos, rec) {
+            this.displayText = displayText;
+            this.len = len;
+            this.containerFile = containerFile;
+            this.offsetInContainer = offsetInContainer;
+            this.exportName = exportName;
+            this.kind = kind;
+        }
+
+        public override string GetText() {
+            return displayText;
+        }
+
+        public override int GetLen() {
+            return len;
+        }
+
+        public override string GetExportName() {
+            return exportName;
+        }
+
+        [Browsable(false)]
+        public ActorModelSectionKind SectionKind {
+            get { return kind; }
+        }
+
+        [ReadOnly(true)]
+        [Category("Section")]
+        [DisplayName("Container")]
+        public string ContainerFile {
+            get { return containerFile; }
+        }
+
+        [ReadOnly(true)]
+        [Category("Section")]
+        [DisplayName("Offset In ZUD")]
+        public string OffsetInContainer {
+            get { return "0x" + offsetInContainer.ToString("X8"); }
+        }
+
+        [ReadOnly(true)]
+        [Category("Section")]
+        [DisplayName("Length")]
+        public int Length {
+            get { return len; }
+        }
+    }
+
     public class Actor : InMemory {
         private Zone zone;
         private ZUD zud;
+        private DirRec zudRec;
 
         public Actor(string url, int pos, DirRec rec,
         Zone zone, int zoneid, int actorid, DirRec zud_rec):
@@ -16,6 +91,7 @@ namespace GodHands {
             this.zone = zone;
             this.ZoneId = zoneid;
             this.ActorId = actorid;
+            zudRec = zud_rec;
             zud = Model.zuds[zud_rec.GetUrl()];
         }
 
@@ -41,6 +117,111 @@ namespace GodHands {
 
         public string GetZndFileName() {
             return GetRec().GetFileName();
+        }
+
+        private int GetZudField32(int offset) {
+            return RamDisk.GetS32(zud.GetPos() + offset);
+        }
+
+        private string DescribeZudSection(int ptrOffset, int lenOffset) {
+            int ptr = GetZudField32(ptrOffset);
+            int len = GetZudField32(lenOffset);
+            if (len <= 0) {
+                return "";
+            }
+            return zudRec.GetFileName() + " +0x" + ptr.ToString("X8") + " (" + len + " bytes)";
+        }
+
+        private ActorModelSection CreateSection(string url, string label, string extension, int ptrOffset, int lenOffset, ActorModelSectionKind kind) {
+            int ptr = GetZudField32(ptrOffset);
+            int len = GetZudField32(lenOffset);
+            if (len <= 0) {
+                return null;
+            }
+
+            string stem = Path.GetFileNameWithoutExtension(zudRec.GetFileName());
+            string exportName = stem + "_" + label.Replace(' ', '_') + extension;
+            return new ActorModelSection(url, ptr, len, zudRec, label, zudRec.GetFileName(), ptr, exportName, kind);
+        }
+
+        public ActorModelSection CreateCharacterShp(string url) {
+            return CreateSection(url, "Character SHP", ".SHP", 0x08, 0x0C, ActorModelSectionKind.CharacterShp);
+        }
+
+        public ActorModelSection CreateWeaponWep(string url) {
+            return CreateSection(url, "Weapon WEP", ".WEP", 0x10, 0x14, ActorModelSectionKind.WeaponWep);
+        }
+
+        public ActorModelSection CreateShieldWep(string url) {
+            return CreateSection(url, "Shield WEP", ".WEP", 0x18, 0x1C, ActorModelSectionKind.ShieldWep);
+        }
+
+        public ActorSeqSection CreateCommonSeq(string url) {
+            int ptr = GetZudField32(0x20);
+            int len = GetZudField32(0x24);
+            if (len <= 0) {
+                return null;
+            }
+            string stem = Path.GetFileNameWithoutExtension(zudRec.GetFileName());
+            string exportName = stem + "_SEQ_Common.SEQ";
+            return new ActorSeqSection(url, ptr, len, zudRec, "SEQ Common", zudRec.GetFileName(), ptr, exportName, ActorModelSectionKind.CommonSeq);
+        }
+
+        public ActorSeqSection CreateBattleSeq(string url) {
+            int ptr = GetZudField32(0x28);
+            int len = GetZudField32(0x2C);
+            if (len <= 0) {
+                return null;
+            }
+            string stem = Path.GetFileNameWithoutExtension(zudRec.GetFileName());
+            string exportName = stem + "_SEQ_Battle.SEQ";
+            return new ActorSeqSection(url, ptr, len, zudRec, "SEQ Battle", zudRec.GetFileName(), ptr, exportName, ActorModelSectionKind.BattleSeq);
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("ZUD File")]
+        public string ZudFile {
+            get { return zudRec.GetFileName(); }
+        }
+
+        public DirRec GetZudRec() {
+            return zudRec;
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("SHP")]
+        public string CharacterShp {
+            get { return DescribeZudSection(0x08, 0x0C); }
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("WEP Weapon")]
+        public string WeaponWep {
+            get { return DescribeZudSection(0x10, 0x14); }
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("WEP Shield")]
+        public string ShieldWep {
+            get { return DescribeZudSection(0x18, 0x1C); }
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("SEQ Common")]
+        public string CommonSeq {
+            get { return DescribeZudSection(0x20, 0x24); }
+        }
+
+        [ReadOnly(true)]
+        [Category("Model")]
+        [DisplayName("SEQ Battle")]
+        public string BattleSeq {
+            get { return DescribeZudSection(0x28, 0x2C); }
         }
 
         [Category("Stats")]

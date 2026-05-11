@@ -30,9 +30,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.property = new System.Windows.Forms.PropertyGrid();
-            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
-            this.textbox = new System.Windows.Forms.TextBox();
+            this.detailPanel = new System.Windows.Forms.Panel();
             this.picturebox = new System.Windows.Forms.PictureBox();
+            this.vstoolsPanel = new System.Windows.Forms.Panel();
+            this.textbox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -42,10 +43,7 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
-            this.splitContainer3.Panel1.SuspendLayout();
-            this.splitContainer3.Panel2.SuspendLayout();
-            this.splitContainer3.SuspendLayout();
+            this.detailPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picturebox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -129,7 +127,7 @@
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
+            this.splitContainer2.Panel2.Controls.Add(this.detailPanel);
             this.splitContainer2.Size = new System.Drawing.Size(426, 438);
             this.splitContainer2.SplitterDistance = 224;
             this.splitContainer2.TabIndex = 0;
@@ -143,24 +141,36 @@
             this.property.Size = new System.Drawing.Size(224, 438);
             this.property.TabIndex = 0;
             // 
-            // splitContainer3
+            // detailPanel
             // 
-            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer3.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer3.Name = "splitContainer3";
-            this.splitContainer3.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.detailPanel.Controls.Add(this.picturebox);
+            this.detailPanel.Controls.Add(this.vstoolsPanel);
+            this.detailPanel.Controls.Add(this.textbox);
+            this.detailPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.detailPanel.Location = new System.Drawing.Point(0, 0);
+            this.detailPanel.Name = "detailPanel";
+            this.detailPanel.Size = new System.Drawing.Size(198, 438);
+            this.detailPanel.TabIndex = 0;
             // 
-            // splitContainer3.Panel1
+            // picturebox
             // 
-            this.splitContainer3.Panel1.Controls.Add(this.textbox);
+            this.picturebox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picturebox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picturebox.Location = new System.Drawing.Point(0, 0);
+            this.picturebox.Name = "picturebox";
+            this.picturebox.Size = new System.Drawing.Size(198, 438);
+            this.picturebox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picturebox.TabIndex = 2;
+            this.picturebox.TabStop = false;
+            this.picturebox.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaintPictureBox);
             // 
-            // splitContainer3.Panel2
+            // vstoolsPanel
             // 
-            this.splitContainer3.Panel2.Controls.Add(this.picturebox);
-            this.splitContainer3.Size = new System.Drawing.Size(198, 438);
-            this.splitContainer3.SplitterDistance = 333;
-            this.splitContainer3.TabIndex = 0;
+            this.vstoolsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.vstoolsPanel.Location = new System.Drawing.Point(0, 0);
+            this.vstoolsPanel.Name = "vstoolsPanel";
+            this.vstoolsPanel.Size = new System.Drawing.Size(198, 438);
+            this.vstoolsPanel.TabIndex = 0;
             // 
             // textbox
             // 
@@ -169,20 +179,10 @@
             this.textbox.Location = new System.Drawing.Point(0, 0);
             this.textbox.Multiline = true;
             this.textbox.Name = "textbox";
-            this.textbox.Size = new System.Drawing.Size(198, 333);
+            this.textbox.ReadOnly = true;
+            this.textbox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textbox.Size = new System.Drawing.Size(198, 438);
             this.textbox.TabIndex = 0;
-            // 
-            // picturebox
-            // 
-            this.picturebox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.picturebox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturebox.Location = new System.Drawing.Point(0, 0);
-            this.picturebox.Name = "picturebox";
-            this.picturebox.Size = new System.Drawing.Size(198, 101);
-            this.picturebox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.picturebox.TabIndex = 1;
-            this.picturebox.TabStop = false;
-            this.picturebox.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaintPictureBox);
             // 
             // ZndEditor
             // 
@@ -201,11 +201,8 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            this.splitContainer3.Panel1.ResumeLayout(false);
-            this.splitContainer3.Panel1.PerformLayout();
-            this.splitContainer3.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
-            this.splitContainer3.ResumeLayout(false);
+            this.detailPanel.ResumeLayout(false);
+            this.detailPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picturebox)).EndInit();
             this.ResumeLayout(false);
 
@@ -219,10 +216,11 @@
         private System.Windows.Forms.ComboBox combobox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.SplitContainer splitContainer2;
-        private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.TextBox textbox;
         private System.Windows.Forms.PropertyGrid property;
         private System.Windows.Forms.PictureBox picturebox;
+        private System.Windows.Forms.Panel detailPanel;
+        private System.Windows.Forms.Panel vstoolsPanel;
 
     }
 }

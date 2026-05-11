@@ -20,3 +20,29 @@ Z:\2020\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.pdb
 Z:\2020\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.ConfigTool.resources
 Z:\2020\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.DatabaseTool.resources
 Z:\2020\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.MonitorTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\GodHands.exe
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\GodHands.pdb
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.csproj.AssemblyReference.cache
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.ConfigTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.DatabaseTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.DiskTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.Frame.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.LogTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.ZndEditor.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.MonitorTool.resources
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.csproj.GenerateResource.cache
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.csproj.CoreCompileInputs.cache
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.exe
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.pdb
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\runtimes\win-x86\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\runtimes\win-x64\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\runtimes\win-arm64\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\Microsoft.Web.WebView2.Core.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\Microsoft.Web.WebView2.WinForms.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\bin\Release\Microsoft.Web.WebView2.Wpf.dll
+C:\Users\Chris\Desktop\vs usa\_refs\GodHands\WinForms\GodHands\GodHands\obj\Release\GodHands.csproj.Up2Date
+C:\Users\Chris\Desktop\vs usa\.codex_tmp\godhands-verify\runtimes\win-x86\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\.codex_tmp\godhands-verify\runtimes\win-x64\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\.codex_tmp\godhands-verify\runtimes\win-arm64\native\WebView2Loader.dll
+C:\Users\Chris\Desktop\vs usa\.codex_tmp\godhands-verify\GodHands.exe
+C:\Users\Chris\Desktop\vs usa\.codex_tmp\godhands-verify\GodHands.pdb

@@ -68,11 +68,40 @@ namespace GodHands {
 
                 // ************************************************************
                 // Add the ZUD file
+                Model.Add(url+"/Model", Model.zuds[zud.GetUrl()]);
                 TreeNode tv_model = node.Nodes.Add(url+"/Model", zud.GetFileName(), 28, 28);
-                tv_model.Nodes.Add(url+"/Model/SHP", "SHP", 28, 28);
-                tv_model.Nodes.Add(url+"/Model/WEP", "WEP", 28, 28);
-                tv_model.Nodes.Add(url+"/Model/SEQ", "SEQ Common", 29, 29);
-                tv_model.Nodes.Add(url+"/Model/SEQ", "SEQ Battle", 29, 29);
+
+                ActorModelSection shp = obj.CreateCharacterShp(url+"/Model/SHP");
+                if (shp != null) {
+                    Publisher.Register(shp);
+                    tv_model.Nodes.Add(shp.GetUrl(), shp.GetText(), 28, 28);
+                }
+
+                ActorModelSection weaponWep = obj.CreateWeaponWep(url+"/Model/WEP_Weapon");
+                if (weaponWep != null) {
+                    Publisher.Register(weaponWep);
+                    tv_model.Nodes.Add(weaponWep.GetUrl(), weaponWep.GetText(), 28, 28);
+                }
+
+                ActorModelSection shieldWep = obj.CreateShieldWep(url+"/Model/WEP_Shield");
+                if (shieldWep != null) {
+                    Publisher.Register(shieldWep);
+                    tv_model.Nodes.Add(shieldWep.GetUrl(), shieldWep.GetText(), 28, 28);
+                }
+
+                ActorSeqSection commonSeq = obj.CreateCommonSeq(url+"/Model/SEQ_Common");
+                if (commonSeq != null) {
+                    Publisher.Register(commonSeq);
+                    TreeNode tv_common = tv_model.Nodes.Add(commonSeq.GetUrl(), commonSeq.GetText(), 29, 29);
+                    commonSeq.OpenSection(tv_common);
+                }
+
+                ActorSeqSection battleSeq = obj.CreateBattleSeq(url+"/Model/SEQ_Battle");
+                if (battleSeq != null) {
+                    Publisher.Register(battleSeq);
+                    TreeNode tv_battle = tv_model.Nodes.Add(battleSeq.GetUrl(), battleSeq.GetText(), 29, 29);
+                    battleSeq.OpenSection(tv_battle);
+                }
 
                 // ************************************************************
                 // Add bodyparts

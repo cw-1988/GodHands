@@ -121,7 +121,7 @@ namespace GodHands {
             cleared.OpenSection(root.Nodes.Add(url+"/Cleared", "Cleared", 31, 31));
 
             script = new RoomScriptSection(url+"/Script", ptrScriptSection, lenScriptSection, GetRec());
-            script.OpenSection(root.Nodes.Add(url+"/Script", "Script", 36, 36));
+            script.OpenSection(root.Nodes.Add(url+"/Script", script.GetDisplayText(), 36, 36));
 
             doors = new RoomDoorSection(url+"/Doors", ptrDoorSection, lenDoorSection, GetRec());
             doors.OpenSection(root.Nodes.Add(url+"/Doors", "Doors", 33, 34));
@@ -132,6 +132,14 @@ namespace GodHands {
             treasure = new RoomTreasureSection(url+"/Treasure", ptrTreasureSection, lenTreasureSection, GetRec());
             treasure.OpenSection(root.Nodes.Add(url+"/Treasure", "Treasure", 37, 37));
             return true;
+        }
+
+        public DirRec GetMpdRec() {
+            return GetRec();
+        }
+
+        public DirRec GetZndRec() {
+            return zone.GetRec();
         }
     }
 }

@@ -12,10 +12,13 @@ namespace GodHands {
     public partial class Frame : Form {
         private OpenFileDialog ofd = new OpenFileDialog();
         private SaveFileDialog sfd = new SaveFileDialog();
+        private bool triedAutoOpen = false;
+        private bool restoredWindowPlacement = false;
         //private Subscriber_PropertyGrid sub_property = null;
 
         public Frame() {
             InitializeComponent();
+            RestoreWindowPlacement();
             //Icon = View.IconFromFile("/img/menu/tools-disk-16.png");
             Icon = View.IconFromFile("/img/icon.ico");
             menu_open.Image = View.ImageFromFile("/img/menu/file-open-16.png");
@@ -47,9 +50,11 @@ namespace GodHands {
             Logger.AddStatusBar(statusbar);
             Logger.AddProgressBar(progressbar);
             statusbar.Image = View.ImageFromFile("/img/status/status-info.png");
+            Shown += new EventHandler(OnShown);
         }
 
         private void OnClosing(object sender, FormClosingEventArgs e) {
+            SaveWindowPlacement();
             Logger.RemoveStatusBar(statusbar);
             Logger.RemoveProgressBar(progressbar);
         }
@@ -58,11 +63,7 @@ namespace GodHands {
             ofd.Title = "Open CD Image";
             ofd.Filter = "CD Images|*.bin;*.img;*.iso|All Files|*.*";
             if (ofd.ShowDialog() == DialogResult.OK) {
-                if (Iso9660.Open(ofd.FileName)) {
-                    //sub_property.Notify(Iso9660.pvd);
-                    //sub_property.Notify(Iso9660.root);
-                    zndeditor.OpenDisk();
-                }
+                OpenDiskImage(ofd.FileName);
             }
         }
 
@@ -147,6 +148,106 @@ namespace GodHands {
                     form.Show();
                 }
             }
+        }
+
+        private void OnShown(object sender, EventArgs e) {
+            if (triedAutoOpen) {
+                return;
+            }
+            triedAutoOpen = true;
+
+            string path = Config.LastOpenedImagePath;
+            if (string.IsNullOrWhiteSpace(path)) {
+                return;
+            }
+
+            if (!File.Exists(path)) {
+                Logger.Warn("Auto-open skipped because the configured image path was not found: " + path);
+                return;
+            }
+
+            OpenDiskImage(path);
+        }
+
+        private bool OpenDiskImage(string path) {
+            if (string.IsNullOrWhiteSpace(path)) {
+                return false;
+            }
+
+            if (Iso9660.Open(path)) {
+                Config.LastOpenedImagePath = Path.GetFullPath(path);
+                //sub_property.Notify(Iso9660.pvd);
+                //sub_property.Notify(Iso9660.root);
+                zndeditor.OpenDisk();
+                return true;
+            }
+            return false;
+        }
+
+        private void RestoreWindowPlacement() {
+            if (restoredWindowPlacement) {
+                return;
+            }
+            restoredWindowPlacement = true;
+
+            int? x = Config.WindowX;
+            int? y = Config.WindowY;
+            int? width = Config.WindowWidth;
+            int? height = Config.WindowHeight;
+            if (!x.HasValue || !y.HasValue || !width.HasValue || !height.HasValue) {
+                return;
+            }
+
+            if (width.Value < 200 || height.Value < 200) {
+                return;
+            }
+
+            Rectangle bounds = new Rectangle(x.Value, y.Value, width.Value, height.Value);
+            if (!IsVisibleOnAnyScreen(bounds)) {
+                bounds = EnsureVisibleBounds(bounds);
+            }
+
+            StartPosition = FormStartPosition.Manual;
+            DesktopBounds = bounds;
+
+            FormWindowState? state = Config.WindowState;
+            if (state.HasValue && state.Value == FormWindowState.Maximized) {
+                WindowState = FormWindowState.Maximized;
+            }
+        }
+
+        private void SaveWindowPlacement() {
+            Rectangle bounds = WindowState == FormWindowState.Normal ? DesktopBounds : RestoreBounds;
+            if (bounds.Width > 0 && bounds.Height > 0) {
+                Config.WindowX = bounds.X;
+                Config.WindowY = bounds.Y;
+                Config.WindowWidth = bounds.Width;
+                Config.WindowHeight = bounds.Height;
+            }
+
+            FormWindowState state = WindowState;
+            if (state == FormWindowState.Minimized) {
+                state = FormWindowState.Normal;
+            }
+            Config.WindowState = state;
+        }
+
+        private static bool IsVisibleOnAnyScreen(Rectangle bounds) {
+            foreach (Screen screen in Screen.AllScreens) {
+                if (screen.WorkingArea.IntersectsWith(bounds)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static Rectangle EnsureVisibleBounds(Rectangle bounds) {
+            Rectangle workingArea = Screen.PrimaryScreen.WorkingArea;
+            int width = Math.Min(bounds.Width, workingArea.Width);
+            int height = Math.Min(bounds.Height, workingArea.Height);
+            int x = Math.Max(workingArea.Left, Math.Min(bounds.X, workingArea.Right - width));
+            int y = Math.Max(workingArea.Top, Math.Min(bounds.Y, workingArea.Bottom - height));
+            return new Rectangle(x, y, width, height);
         }
     }
 }

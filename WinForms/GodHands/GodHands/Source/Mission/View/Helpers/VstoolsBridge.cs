@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -92,6 +93,46 @@ namespace GodHands {
 
     public static class VstoolsBridge {
         private static VstoolsHttpServer server = null;
+        private static readonly object embeddedRootLock = new object();
+        private static string embeddedRoot = null;
+        private static readonly string[] embeddedStaticFiles = new string[] {
+            "index.html",
+            "css/debug.css",
+            "css/main.css",
+            "dist/Akao.js",
+            "dist/ARM.js",
+            "dist/ARMRoom.js",
+            "dist/Collada.js",
+            "dist/FBC.js",
+            "dist/FBT.js",
+            "dist/FrameBuffer.js",
+            "dist/GIM.js",
+            "dist/MPD.js",
+            "dist/MPDFace.js",
+            "dist/MPDGroup.js",
+            "dist/MPDMesh.js",
+            "dist/P.js",
+            "dist/Reader.js",
+            "dist/SEQ.js",
+            "dist/SEQAnimation.js",
+            "dist/SHP.js",
+            "dist/SOUND.js",
+            "dist/Text.js",
+            "dist/three.js",
+            "dist/TIM.js",
+            "dist/Viewer.js",
+            "dist/VSTOOLS.js",
+            "dist/WEP.js",
+            "dist/WEPBone.js",
+            "dist/WEPFace.js",
+            "dist/WEPGroup.js",
+            "dist/WEPPalette.js",
+            "dist/WEPTextureMap.js",
+            "dist/WEPVertex.js",
+            "dist/ZND.js",
+            "dist/ZUD.js",
+            "dist/ui/ui-panel.js",
+        };
 
         public static bool CanLaunch(object obj) {
             return (obj is Actor)
@@ -303,6 +344,15 @@ namespace GodHands {
         }
 
         private static string FindVstoolsRoot() {
+            string embedded = EnsureEmbeddedVstoolsRoot();
+            if (embedded != null) {
+                return embedded;
+            }
+
+            return FindExternalVstoolsRoot();
+        }
+
+        private static string FindExternalVstoolsRoot() {
             List<string> seeds = new List<string>();
             seeds.Add(AppDomain.CurrentDomain.BaseDirectory);
             seeds.Add(Environment.CurrentDirectory);
@@ -329,10 +379,101 @@ namespace GodHands {
             return null;
         }
 
+        private static string EnsureEmbeddedVstoolsRoot() {
+            lock (embeddedRootLock) {
+                if (!string.IsNullOrEmpty(embeddedRoot) && IsVstoolsRoot(embeddedRoot)) {
+                    return embeddedRoot;
+                }
+
+                string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (string.IsNullOrEmpty(baseDir)) {
+                    baseDir = Path.GetTempPath();
+                }
+                if (string.IsNullOrEmpty(baseDir)) {
+                    return null;
+                }
+
+                string root = Path.Combine(
+                    baseDir,
+                    "GodHands",
+                    "EmbeddedVstools",
+                    GetEmbeddedVersionStamp()
+                );
+
+                if (!ExtractEmbeddedVstools(root)) {
+                    return null;
+                }
+
+                embeddedRoot = root;
+                return embeddedRoot;
+            }
+        }
+
+        private static string GetEmbeddedVersionStamp() {
+            Assembly assembly = typeof(VstoolsBridge).Assembly;
+            string version = "0";
+            string lastWriteTicks = "0";
+
+            try {
+                Version assemblyVersion = assembly.GetName().Version;
+                if (assemblyVersion != null) {
+                    version = assemblyVersion.ToString();
+                }
+            } catch {}
+
+            try {
+                if (!string.IsNullOrEmpty(assembly.Location) && File.Exists(assembly.Location)) {
+                    lastWriteTicks = File.GetLastWriteTimeUtc(assembly.Location).Ticks.ToString();
+                }
+            } catch {}
+
+            return SafeName(version + "_" + lastWriteTicks);
+        }
+
+        private static bool ExtractEmbeddedVstools(string root) {
+            try {
+                Directory.CreateDirectory(root);
+                foreach (string relativePath in embeddedStaticFiles) {
+                    if (!ExtractEmbeddedFile(root, relativePath)) {
+                        return false;
+                    }
+                }
+
+                Directory.CreateDirectory(Path.Combine(root, "data", "launches", "godhands"));
+                return IsVstoolsRoot(root);
+            } catch {
+                return false;
+            }
+        }
+
+        private static bool ExtractEmbeddedFile(string root, string relativePath) {
+            string targetPath = Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar));
+            string targetDir = Path.GetDirectoryName(targetPath);
+            if (!string.IsNullOrEmpty(targetDir) && !Directory.Exists(targetDir)) {
+                Directory.CreateDirectory(targetDir);
+            }
+
+            string resourceName = "GodHands.EmbeddedVstools." + relativePath.Replace('/', '.');
+            Assembly assembly = typeof(VstoolsBridge).Assembly;
+            using (Stream input = assembly.GetManifestResourceStream(resourceName)) {
+                if (input == null) {
+                    return false;
+                }
+
+                using (FileStream output = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.Read)) {
+                    input.CopyTo(output);
+                }
+            }
+            return true;
+        }
+
         private static bool IsVstoolsRoot(string path) {
             return Directory.Exists(path)
                 && File.Exists(Path.Combine(path, "index.html"))
-                && File.Exists(Path.Combine(path, "src", "Viewer.js"));
+                && (
+                    File.Exists(Path.Combine(path, "dist", "Viewer.js"))
+                    || File.Exists(Path.Combine(path, "src", "Viewer.js"))
+                );
         }
 
         private static string SafeName(string value) {

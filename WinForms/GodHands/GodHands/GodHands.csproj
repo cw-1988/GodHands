@@ -259,6 +259,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\..\..\vstools\index.html">
+      <Link>EmbeddedVstools\index.html</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\..\..\vstools\css\**\*.*">
+      <Link>EmbeddedVstools\css\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\..\..\vstools\dist\**\*.*">
+      <Link>EmbeddedVstools\dist\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>

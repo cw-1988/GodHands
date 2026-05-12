@@ -115,6 +115,7 @@ namespace GodHands {
             "dist/Reader.js",
             "dist/SEQ.js",
             "dist/SEQAnimation.js",
+            "dist/shp-seq-resolver.js",
             "dist/SHP.js",
             "dist/SOUND.js",
             "dist/Text.js",

@@ -275,12 +275,52 @@ namespace GodHands {
                 return null;
             }
 
-            return server.BaseUrl
-                + "index.html?file1="
-                + Uri.EscapeDataString(ToViewerRelative(bundleName, zndRec.GetFileName()))
-                + "&file2="
-                + Uri.EscapeDataString(ToViewerRelative(bundleName, mpdRec.GetFileName()))
-                + "&embedded=1";
+            List<string> supplementalZnds = new List<string>();
+            foreach (DirRec supplementalRec in GetSupplementalZndRecs(room, zndRec)) {
+                string supplementalName = supplementalRec.GetFileName();
+                if (!WriteRecToBundle(bundleDir, supplementalName, supplementalRec)) {
+                    continue;
+                }
+                supplementalZnds.Add(ToViewerRelative(bundleName, supplementalName));
+            }
+
+            StringBuilder url = new StringBuilder();
+            url.Append(server.BaseUrl);
+            url.Append("index.html?file1=");
+            url.Append(Uri.EscapeDataString(ToViewerRelative(bundleName, zndRec.GetFileName())));
+            url.Append("&file2=");
+            url.Append(Uri.EscapeDataString(ToViewerRelative(bundleName, mpdRec.GetFileName())));
+            for (int i = 0; i < supplementalZnds.Count; i++) {
+                url.Append("&aux");
+                url.Append(i + 1);
+                url.Append("=");
+                url.Append(Uri.EscapeDataString(supplementalZnds[i]));
+            }
+            url.Append("&embedded=1");
+            return url.ToString();
+        }
+
+        private static IEnumerable<DirRec> GetSupplementalZndRecs(Room room, DirRec primaryZndRec) {
+            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (primaryZndRec != null) {
+                seen.Add(primaryZndRec.GetFileName());
+            }
+
+            foreach (int zoneId in new int[] { room.ZoneId - 1, room.ZoneId + 1 }) {
+                if (zoneId < 0) {
+                    continue;
+                }
+
+                string zoneFileName = "ZONE" + zoneId.ToString("D3") + ".ZND";
+                if (!seen.Add(zoneFileName)) {
+                    continue;
+                }
+
+                DirRec rec = Model.GetRec(zoneFileName);
+                if (rec != null) {
+                    yield return rec;
+                }
+            }
         }
 
         private static byte[] ReadWholeFile(DirRec rec) {

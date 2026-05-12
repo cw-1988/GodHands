@@ -251,7 +251,8 @@ namespace GodHands {
             File.WriteAllBytes(Path.Combine(bundleDir, name), raw);
             return server.BaseUrl
                 + "index.html?file1="
-                + Uri.EscapeDataString(ToViewerRelative(bundleName, name));
+                + Uri.EscapeDataString(ToViewerRelative(bundleName, name))
+                + "&embedded=1";
         }
 
         private static string BuildMpdLaunchUrl(Room room, string vstoolsRoot) {
@@ -278,7 +279,8 @@ namespace GodHands {
                 + "index.html?file1="
                 + Uri.EscapeDataString(ToViewerRelative(bundleName, zndRec.GetFileName()))
                 + "&file2="
-                + Uri.EscapeDataString(ToViewerRelative(bundleName, mpdRec.GetFileName()));
+                + Uri.EscapeDataString(ToViewerRelative(bundleName, mpdRec.GetFileName()))
+                + "&embedded=1";
         }
 
         private static byte[] ReadWholeFile(DirRec rec) {
@@ -341,6 +343,7 @@ namespace GodHands {
                 url.Append("&anim=");
                 url.Append(animation.AnimationId);
             }
+            url.Append("&embedded=1");
             return url.ToString();
         }
 

@@ -284,6 +284,22 @@ namespace GodHands {
                 supplementalZnds.Add(ToViewerRelative(bundleName, supplementalName));
             }
 
+            List<string> enemyZuds = new List<string>();
+            foreach (DirRec zudRec in GetZoneZudRecs(zndRec)) {
+                if (zudRec == null) {
+                    enemyZuds.Add(null);
+                    continue;
+                }
+
+                string zudName = zudRec.GetFileName();
+                if (!WriteRecToBundle(bundleDir, zudName, zudRec)) {
+                    enemyZuds.Add(null);
+                    continue;
+                }
+
+                enemyZuds.Add(ToViewerRelative(bundleName, zudName));
+            }
+
             StringBuilder url = new StringBuilder();
             url.Append(server.BaseUrl);
             url.Append("index.html?file1=");
@@ -295,6 +311,14 @@ namespace GodHands {
                 url.Append(i + 1);
                 url.Append("=");
                 url.Append(Uri.EscapeDataString(supplementalZnds[i]));
+            }
+            for (int i = 0; i < enemyZuds.Count; i++) {
+                url.Append("&zud");
+                url.Append(i + 1);
+                url.Append("=");
+                if (!string.IsNullOrEmpty(enemyZuds[i])) {
+                    url.Append(Uri.EscapeDataString(enemyZuds[i]));
+                }
             }
             url.Append("&embedded=1");
             return url.ToString();
@@ -323,6 +347,38 @@ namespace GodHands {
             }
         }
 
+        private static IEnumerable<DirRec> GetZoneZudRecs(DirRec zndRec) {
+            byte[] raw = ReadWholeFile(zndRec);
+            if ((raw == null) || (raw.Length < 0x10)) {
+                yield break;
+            }
+
+            int ptrZud = ReadS32(raw, 0x08);
+            int lenZud = ReadS32(raw, 0x0C);
+            if ((ptrZud < 0) || (lenZud < 4) || ((ptrZud + lenZud) > raw.Length)) {
+                yield break;
+            }
+
+            int numZud = ReadS32(raw, ptrZud);
+            if (numZud <= 0) {
+                yield break;
+            }
+
+            for (int i = 0; i < numZud; i++) {
+                int entry = ptrZud + 4 + i*8;
+                if ((entry < 0) || ((entry + 8) > raw.Length)) {
+                    yield break;
+                }
+
+                int lba = ReadS32(raw, entry);
+                DirRec rec = null;
+                try {
+                    rec = Iso9660.GetByLba(lba);
+                } catch {}
+                yield return rec;
+            }
+        }
+
         private static byte[] ReadWholeFile(DirRec rec) {
             if (rec == null) {
                 return null;
@@ -333,6 +389,13 @@ namespace GodHands {
                 return null;
             }
             return raw;
+        }
+
+        private static int ReadS32(byte[] raw, int offset) {
+            if ((raw == null) || (offset < 0) || ((offset + 4) > raw.Length)) {
+                return 0;
+            }
+            return BitConverter.ToInt32(raw, offset);
         }
 
         private static string ToViewerRelative(string bundleName, string fileName) {

@@ -134,6 +134,8 @@
     <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomEnemySection.cs" />
     <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomMainSection.cs" />
     <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomScriptSection.cs" />
+    <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomTrap.cs" />
+    <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomTrapSection.cs" />
     <Compile Include="Source\Mission\Model\InMemory\Rooms\RoomTreasureSection.cs" />
     <Compile Include="Source\Mission\Model\InMemory\Rooms\Treasure\TreasureAccessory.cs" />
     <Compile Include="Source\Mission\Model\InMemory\Rooms\Treasure\TreasureArmour.cs" />

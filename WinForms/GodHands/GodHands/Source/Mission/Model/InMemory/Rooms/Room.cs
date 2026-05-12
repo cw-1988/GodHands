@@ -15,6 +15,7 @@ namespace GodHands {
         private RoomDoorSection doors;
         private RoomEnemySection enemies;
         private RoomTreasureSection treasure;
+        private RoomTrapSection traps;
 
         public Room(string url, int pos, DirRec rec,
         Zone zone, int zoneid, int roomid):
@@ -110,6 +111,25 @@ namespace GodHands {
             set { UndoRedo.Exec(new BindS32(this, 0x2C, value)); }
         }
 
+        private int GetRoomSectionLength(int index) {
+            if ((index < 0) || (index >= 24) || (ptrMainSection <= 0)) {
+                return 0;
+            }
+            return RamDisk.GetS32(GetPos() + ptrMainSection + index*4);
+        }
+
+        private int GetRoomSectionOffset(int index) {
+            if ((index < 0) || (index >= 24) || (ptrMainSection <= 0)) {
+                return 0;
+            }
+
+            int offset = ptrMainSection + 0x60;
+            for (int i = 0; i < index; i++) {
+                offset += GetRoomSectionLength(i);
+            }
+            return offset;
+        }
+
         public bool AddRoom(TreeNode root, string url, int id, int pos) {
             main = new RoomMainSection(url+"/Main", ptrMainSection, lenMainSection, GetRec());
             main.OpenSection(root.Nodes.Add(url+"/Main", "Main", 28, 28));
@@ -131,6 +151,14 @@ namespace GodHands {
 
             treasure = new RoomTreasureSection(url+"/Treasure", ptrTreasureSection, lenTreasureSection, GetRec());
             treasure.OpenSection(root.Nodes.Add(url+"/Treasure", "Treasure", 37, 37));
+
+            int trapSectionOffset = GetRoomSectionOffset(8);
+            int trapSectionLength = GetRoomSectionLength(8);
+            traps = new RoomTrapSection(url+"/Traps", trapSectionOffset, trapSectionLength, GetRec());
+            if (traps.HasEntries()) {
+                TreeNode trapsNode = root.Nodes.Add(url+"/Traps", "Traps", 37, 37);
+                traps.OpenSection(trapsNode);
+            }
             return true;
         }
 
